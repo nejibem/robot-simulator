@@ -27,18 +27,17 @@ class RobotSimulator
     private $currentDirection = null;
 
 
-    public function isCommandValid($command)
+    public function isCommandValid(string $command) :bool
     {
         return in_array($command, $this->simpleCommands) || $this->isPlaceValid($command);
     }
 
-    public function isPlaceValid($command)
+    public function isPlaceValid($command) :bool
     {
-        preg_match("/PLACE (0|1|2|3|4){1},(0|1|2|3|4){1},(NORTH|EAST|SOUTH|WEST)+/", $command, $matches);
-        return $matches;
+        return count($this->parsePlace($command)) === 4;
     }
 
-    public function isMoveValid()
+    public function isMoveValid() :bool
     {
         if($this->currentPositionY === 4 && $this->currentDirection === self::DIRECTION_NORTH)
         {
@@ -62,7 +61,7 @@ class RobotSimulator
         }
     }
 
-    public function runCommands($commands)
+    public function runCommands(array $commands) :self
     {
         foreach($commands as $command)
         {
@@ -80,7 +79,13 @@ class RobotSimulator
         ], ",");
     }
 
-    private function runCommand($command)
+    private function parsePlace($command) :array
+    {
+        preg_match("/PLACE (0|1|2|3|4){1},(0|1|2|3|4){1},(NORTH|EAST|SOUTH|WEST)+/", $command, $matches);
+        return $matches;
+    }
+
+    private function runCommand(string $command) :void
     {
         if($command === self::COMMAND_MOVE && $this->isMoveValid($command))
         {
@@ -100,7 +105,7 @@ class RobotSimulator
 
     }
 
-    private function move()
+    private function move() :void
     {
         if($this->currentDirection === self::DIRECTION_NORTH)
         {
@@ -120,15 +125,15 @@ class RobotSimulator
         }
     }
 
-    private function place($command)
+    private function place(string $command) :void
     {
-        $newPlace = $this->isPlaceValid($command);
+        $newPlace = $this->parsePlace($command);
         $this->currentPositionX = (int) $newPlace[1];
         $this->currentPositionY = (int) $newPlace[2];
         $this->currentDirection = (string) $newPlace[3];
     }
 
-    private function rotateRight()
+    private function rotateRight() :void
     {
         if($this->currentDirection === self::DIRECTION_NORTH)
         {
@@ -148,7 +153,7 @@ class RobotSimulator
         }
     }
 
-    private function rotateLeft()
+    private function rotateLeft() :void
     {
         if($this->currentDirection === self::DIRECTION_NORTH)
         {
